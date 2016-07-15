@@ -18,7 +18,6 @@ import org.mockito.Mock;
 import org.mockito.Spy;
 
 import com.musala.atmosphere.client.entity.DeviceSettingsEntity;
-import com.musala.atmosphere.client.entity.HardwareButtonEntity;
 import com.musala.atmosphere.client.entity.ImageEntity;
 import com.musala.atmosphere.client.entity.ImeEntity;
 import com.musala.atmosphere.client.exceptions.DeviceReleasedException;
@@ -48,9 +47,6 @@ public class ReconnectDeviceTest {
     private static DeviceCommunicator deviceCommunicator = new DeviceCommunicator(mockedClientDevice, TEST_PASSKEY);
 
     @InjectMocks
-    private static HardwareButtonEntity hardwareButtonEntity;
-
-    @InjectMocks
     private static ImeEntity imeEntity;
 
     @InjectMocks
@@ -64,11 +60,6 @@ public class ReconnectDeviceTest {
     @BeforeClass
     public static void setUp() throws Exception {
         // Constructor visibility is package
-        Constructor<?> hardwareButtonEntityConstructor = HardwareButtonEntity.class.getDeclaredConstructor(DeviceCommunicator.class);
-        hardwareButtonEntityConstructor.setAccessible(true);
-        hardwareButtonEntity = (HardwareButtonEntity) hardwareButtonEntityConstructor.newInstance(new Object[] {
-                deviceCommunicator});
-
         Constructor<?> imeEntityConstructor = ImeEntity.class.getDeclaredConstructor(DeviceCommunicator.class);
         imeEntityConstructor.setAccessible(true);
         imeEntity = (ImeEntity) imeEntityConstructor.newInstance(new Object[] {deviceCommunicator});
@@ -130,9 +121,9 @@ public class ReconnectDeviceTest {
                                       .route(anyLong(), eq(RoutingAction.SEND_BROADCAST), any(AtmosphereIntent.class));
         doThrow(new RemoteException()).when(mockedClientDevice).route(anyLong(), eq(RoutingAction.GET_AWAKE_STATUS));
         doThrow(new RemoteException()).when(mockedClientDevice).route(anyLong(), eq(RoutingAction.IS_LOCKED));
+        doThrow(new RemoteException()).when(mockedClientDevice).route(anyLong(), eq(RoutingAction.PRESS_HARDWARE_BUTTON), anyLong());
 
         testDevice = new Device(deviceCommunicator);
-        testDevice.setHardwareButtonEntity(hardwareButtonEntity);
         testDevice.setImeEntity(imeEntity);
         testDevice.setSettingsEntity(settingsEntity);
         testDevice.setImageEntity(imageEntity);
