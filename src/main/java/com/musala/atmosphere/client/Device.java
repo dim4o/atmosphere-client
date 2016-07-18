@@ -26,7 +26,6 @@ import com.musala.atmosphere.client.entity.DeviceSettingsEntity;
 import com.musala.atmosphere.client.entity.GestureEntity;
 import com.musala.atmosphere.client.entity.GpsLocationEntity;
 import com.musala.atmosphere.client.entity.ImageEntity;
-import com.musala.atmosphere.client.entity.ImeEntity;
 import com.musala.atmosphere.client.exceptions.ActivityStartingException;
 import com.musala.atmosphere.client.exceptions.GettingScreenshotFailedException;
 import com.musala.atmosphere.client.util.ClientConstants;
@@ -84,8 +83,6 @@ public class Device {
     private final DeviceCommunicator communicator;
 
     private GestureEntity gestureEntity;
-
-    private ImeEntity imeEntity;
 
     private DeviceSettingsEntity settingsEntity;
 
@@ -281,7 +278,7 @@ public class Device {
      *         active screen fails.
      */
     public Screen getActiveScreen() {
-        return new Screen(gestureEntity, imeEntity, settingsEntity, imageEntity, elementEntity, communicator);
+        return new Screen(gestureEntity, settingsEntity, imageEntity, elementEntity, communicator);
     }
 
     /**
@@ -481,7 +478,7 @@ public class Device {
      * @return <code>true</code> if the text input is successful, <code>false</code> if it fails.
      */
     public boolean inputText(String text, long interval) {
-        return imeEntity.inputText(text, interval);
+        return (boolean) communicator.sendAction(RoutingAction.IME_INPUT_TEXT, text, interval);
     }
 
     /**
@@ -490,7 +487,7 @@ public class Device {
      * @return <code>true</code> if clear text is successful, <code>false</code> if it fails
      */
     public boolean clearText() {
-        return imeEntity.clearText();
+        return (boolean) communicator.sendAction(RoutingAction.IME_CLEAR_TEXT);
     }
 
     /**
@@ -499,7 +496,7 @@ public class Device {
      * @return <code>true</code> if the text selecting is successful, <code>false</code> if it fails
      */
     public boolean selectAllText() {
-        return imeEntity.selectAllText();
+        return (boolean) communicator.sendAction(RoutingAction.IME_SELECT_ALL_TEXT);
     }
 
     /**
@@ -508,7 +505,7 @@ public class Device {
      * @return <code>true</code> if the operation is successful, <code>false</code> if it fails
      */
     public boolean pasteText() {
-        return imeEntity.pasteText();
+        return (boolean) communicator.sendAction(RoutingAction.IME_PASTE_TEXT);
     }
 
     /**
@@ -517,7 +514,7 @@ public class Device {
      * @return <code>true</code> if copy operation is successful, <code>false</code> if it fails
      */
     public boolean copyText() {
-        return imeEntity.copyText();
+        return (boolean) communicator.sendAction(RoutingAction.IME_COPY_TEXT);
     }
 
     /**
@@ -526,7 +523,7 @@ public class Device {
      * @return <code>true</code> if the operation is successful, <code>false</code> if it fails
      */
     public boolean cutText() {
-        return imeEntity.cutText();
+        return (boolean) communicator.sendAction(RoutingAction.IME_CUT_TEXT);
     }
 
     /**
@@ -1917,16 +1914,6 @@ public class Device {
      */
     void setGestureEntity(GestureEntity gestureEntity) {
         this.gestureEntity = gestureEntity;
-    }
-
-    /**
-     * Sets the {@link ImeEntity entity} responsible for operations related with the input method engine.
-     *
-     * @param imeEntity
-     *        - instance of the entity that handles operations related with the input method engine
-     */
-    void setImeEntity(ImeEntity imeEntity) {
-        this.imeEntity = imeEntity;
     }
 
     /**

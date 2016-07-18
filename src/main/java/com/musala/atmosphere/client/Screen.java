@@ -21,7 +21,6 @@ import com.musala.atmosphere.client.entity.AccessibilityElementEntity;
 import com.musala.atmosphere.client.entity.DeviceSettingsEntity;
 import com.musala.atmosphere.client.entity.GestureEntity;
 import com.musala.atmosphere.client.entity.ImageEntity;
-import com.musala.atmosphere.client.entity.ImeEntity;
 import com.musala.atmosphere.client.exceptions.InvalidCssQueryException;
 import com.musala.atmosphere.client.exceptions.MultipleElementsFoundException;
 import com.musala.atmosphere.client.uiutils.CssToXPathConverter;
@@ -56,8 +55,6 @@ public class Screen {
 
     private GestureEntity gestureEntity;
 
-    private ImeEntity imeEntity;
-
     private ImageEntity imageEntity;
 
     private DeviceSettingsEntity settingsEntity;
@@ -73,13 +70,11 @@ public class Screen {
     @Deprecated
 
     Screen(GestureEntity gestureEntity,
-            ImeEntity imeEntity,
             DeviceSettingsEntity settingsEntity,
             ImageEntity imageEntity,
             String uiHierarchyXml,
             DeviceCommunicator communicator) {
         this.gestureEntity = gestureEntity;
-        this.imeEntity = imeEntity;
         this.settingsEntity = settingsEntity;
         this.imageEntity = imageEntity;
         this.communicator = communicator;
@@ -100,17 +95,20 @@ public class Screen {
         jSoupDocument = Jsoup.parse(screenXml);
     }
 
+    @Deprecated
     Screen(GestureEntity gestureEntity,
-            ImeEntity imeEntity,
             DeviceSettingsEntity settingsEntity,
             ImageEntity imageEntity,
             AccessibilityElementEntity elementEntity,
             DeviceCommunicator communicator) {
         this.gestureEntity = gestureEntity;
-        this.imeEntity = imeEntity;
         this.settingsEntity = settingsEntity;
         this.imageEntity = imageEntity;
         this.elementEntity = elementEntity;
+        this.communicator = communicator;
+    }
+
+    Screen(DeviceCommunicator communicator) {
         this.communicator = communicator;
     }
 
@@ -304,10 +302,10 @@ public class Screen {
         for (AccessibilityElement element : foundElements) {
             uiElements.add(new AccessibilityUiElement(element,
                                                       gestureEntity,
-                                                      imeEntity,
                                                       settingsEntity,
                                                       imageEntity,
-                                                      elementEntity));
+                                                      elementEntity,
+                                                      communicator));
         }
 
         return uiElements;
@@ -599,7 +597,7 @@ public class Screen {
      */
     public WebView getWebView(String packageName) {
         communicator.sendAction(RoutingAction.GET_WEB_VIEW, packageName);
-        return new WebView(communicator, imeEntity);
+        return new WebView(communicator);
     }
 
     /**
