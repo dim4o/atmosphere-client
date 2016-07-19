@@ -8,16 +8,13 @@ import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 
-import java.lang.reflect.Constructor;
 import java.rmi.RemoteException;
 
 import org.junit.BeforeClass;
 import org.junit.Test;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
 
-import com.musala.atmosphere.client.entity.ImageEntity;
 import com.musala.atmosphere.client.exceptions.DeviceReleasedException;
 import com.musala.atmosphere.commons.PowerProperties;
 import com.musala.atmosphere.commons.RoutingAction;
@@ -43,18 +40,10 @@ public class ReconnectDeviceTest {
     @Spy
     private static DeviceCommunicator deviceCommunicator = new DeviceCommunicator(mockedClientDevice, TEST_PASSKEY);
 
-    @InjectMocks
-    private static ImageEntity imageEntity;
-
     private static Device testDevice;
 
     @BeforeClass
     public static void setUp() throws Exception {
-        // Constructor visibility is package
-        Constructor<?> imageEntityConstructor = ImageEntity.class.getDeclaredConstructor(DeviceCommunicator.class);
-        imageEntityConstructor.setAccessible(true);
-        imageEntity = (ImageEntity) imageEntityConstructor.newInstance(new Object[] {deviceCommunicator});
-
         doThrow(new RemoteException()).when(mockedClientDevice).route(anyLong(),
                                                                       eq(RoutingAction.GET_POWER_PROPERTIES));
         doThrow(new RemoteException()).when(mockedClientDevice).route(anyLong(), eq(RoutingAction.APK_INIT_INSTALL));
@@ -113,7 +102,6 @@ public class ReconnectDeviceTest {
         doThrow(new RemoteException()).when(mockedClientDevice).route(anyLong(), eq(RoutingAction.IME_INPUT_TEXT), anyString(), anyLong());
 
         testDevice = new Device(deviceCommunicator);
-        testDevice.setImageEntity(imageEntity);
     }
 
     @Test(expected = DeviceReleasedException.class)
