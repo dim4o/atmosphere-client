@@ -17,10 +17,8 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
 
-import com.musala.atmosphere.client.entity.DeviceSettingsEntity;
 import com.musala.atmosphere.client.entity.ImageEntity;
 import com.musala.atmosphere.client.exceptions.DeviceReleasedException;
-import com.musala.atmosphere.commons.DeviceInformation;
 import com.musala.atmosphere.commons.PowerProperties;
 import com.musala.atmosphere.commons.RoutingAction;
 import com.musala.atmosphere.commons.ScreenOrientation;
@@ -46,9 +44,6 @@ public class ReconnectDeviceTest {
     private static DeviceCommunicator deviceCommunicator = new DeviceCommunicator(mockedClientDevice, TEST_PASSKEY);
 
     @InjectMocks
-    private static DeviceSettingsEntity settingsEntity;
-
-    @InjectMocks
     private static ImageEntity imageEntity;
 
     private static Device testDevice;
@@ -56,17 +51,9 @@ public class ReconnectDeviceTest {
     @BeforeClass
     public static void setUp() throws Exception {
         // Constructor visibility is package
-        Constructor<?> settingsEntitiyConstructor = DeviceSettingsEntity.class.getDeclaredConstructor(DeviceCommunicator.class,
-                                                                                                      DeviceInformation.class);
-        settingsEntitiyConstructor.setAccessible(true);
-        settingsEntity = (DeviceSettingsEntity) settingsEntitiyConstructor.newInstance(new Object[] {deviceCommunicator,
-                mock(DeviceInformation.class)});
-
-        Constructor<?> imageEntityConstructor = ImageEntity.class.getDeclaredConstructor(DeviceCommunicator.class,
-                                                                                         DeviceSettingsEntity.class);
+        Constructor<?> imageEntityConstructor = ImageEntity.class.getDeclaredConstructor(DeviceCommunicator.class);
         imageEntityConstructor.setAccessible(true);
-        imageEntity = (ImageEntity) imageEntityConstructor.newInstance(new Object[] {deviceCommunicator,
-                settingsEntity});
+        imageEntity = (ImageEntity) imageEntityConstructor.newInstance(new Object[] {deviceCommunicator});
 
         doThrow(new RemoteException()).when(mockedClientDevice).route(anyLong(),
                                                                       eq(RoutingAction.GET_POWER_PROPERTIES));
@@ -99,6 +86,15 @@ public class ReconnectDeviceTest {
         doThrow(new RemoteException()).when(mockedClientDevice).route(anyLong(),
                                                                       eq(RoutingAction.SET_WIFI_STATE),
                                                                       anyBoolean());
+        doThrow(new RemoteException()).when(mockedClientDevice).route(anyLong(),
+                                                                      eq(RoutingAction.SET_AIRPLANE_MODE),
+                                                                      anyBoolean());
+        doThrow(new RemoteException()).when(mockedClientDevice).route(anyLong(),
+                                                                      eq(RoutingAction.SET_SCREEN_ORIENTATION),
+                                                                      anyBoolean());
+        doThrow(new RemoteException()).when(mockedClientDevice).route(anyLong(),
+                                                                      eq(RoutingAction.SET_SCREEN_AUTO_ROTATION),
+                                                                      anyBoolean());
         doThrow(new RemoteException()).when(mockedClientDevice)
                                       .route(anyLong(), eq(RoutingAction.SMS_RECEIVE), any(SmsMessage.class));
         doThrow(new RemoteException()).when(mockedClientDevice)
@@ -117,7 +113,6 @@ public class ReconnectDeviceTest {
         doThrow(new RemoteException()).when(mockedClientDevice).route(anyLong(), eq(RoutingAction.IME_INPUT_TEXT), anyString(), anyLong());
 
         testDevice = new Device(deviceCommunicator);
-        testDevice.setSettingsEntity(settingsEntity);
         testDevice.setImageEntity(imageEntity);
     }
 

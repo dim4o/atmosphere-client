@@ -18,7 +18,6 @@ import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
 import com.musala.atmosphere.client.entity.AccessibilityElementEntity;
-import com.musala.atmosphere.client.entity.DeviceSettingsEntity;
 import com.musala.atmosphere.client.entity.ImageEntity;
 import com.musala.atmosphere.client.exceptions.InvalidCssQueryException;
 import com.musala.atmosphere.client.exceptions.MultipleElementsFoundException;
@@ -54,7 +53,6 @@ public class Screen {
 
     private ImageEntity imageEntity;
 
-    private DeviceSettingsEntity settingsEntity;
 
     private AccessibilityElementEntity elementEntity;
 
@@ -66,11 +64,9 @@ public class Screen {
 
     @Deprecated
 
-    Screen(DeviceSettingsEntity settingsEntity,
-            ImageEntity imageEntity,
+    Screen(ImageEntity imageEntity,
             String uiHierarchyXml,
             DeviceCommunicator communicator) {
-        this.settingsEntity = settingsEntity;
         this.imageEntity = imageEntity;
         this.communicator = communicator;
         screenXml = uiHierarchyXml;
@@ -91,11 +87,9 @@ public class Screen {
     }
 
     @Deprecated
-    Screen(DeviceSettingsEntity settingsEntity,
-            ImageEntity imageEntity,
+    Screen(ImageEntity imageEntity,
             AccessibilityElementEntity elementEntity,
             DeviceCommunicator communicator) {
-        this.settingsEntity = settingsEntity;
         this.imageEntity = imageEntity;
         this.elementEntity = elementEntity;
         this.communicator = communicator;
@@ -294,7 +288,6 @@ public class Screen {
         List<UiElement> uiElements = new ArrayList<>();
         for (AccessibilityElement element : foundElements) {
             uiElements.add(new AccessibilityUiElement(element,
-                                                      settingsEntity,
                                                       imageEntity,
                                                       elementEntity,
                                                       communicator));
