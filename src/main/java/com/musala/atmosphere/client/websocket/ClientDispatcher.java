@@ -146,7 +146,7 @@ public class ClientDispatcher {
      * The request is also expected to be executed asynchronously on the Agent. Used for the requests that doesn't
      * require an immediate response and when blocking the main thread is undesirable(i. g. printing a logcat on the
      * console during a test execution).
-     * 
+     *
      * @param deviceId
      *        - identifier of a device
      * @param invocationPasskey
@@ -200,23 +200,21 @@ public class ClientDispatcher {
      */
     public DeviceAllocationInformation getDeviceDescriptor(DeviceSelector deviceSelector,
                                                            int allocateDeviceRetryCount) {
-        do {
-            RequestMessage request = new RequestMessage(MessageAction.DEVICE_ALLOCATION_INFORMATION,
-                                                        deviceSelector);
-            ResponseMessage response = sendRequest(request, session);
-            if (response.getMessageAction() != MessageAction.ERROR) {
-                return (DeviceAllocationInformation) response.getData();
-            }
+        RequestMessage request = new RequestMessage(MessageAction.DEVICE_ALLOCATION_INFORMATION,
+                                                    deviceSelector);
+        ResponseMessage response = sendRequest(request, session, 300_000);
+        if (response.getMessageAction() != MessageAction.ERROR) {
+            return (DeviceAllocationInformation) response.getData();
+        }
 
-            if (response.getException() instanceof NoDeviceMatchingTheGivenSelectorException) {
-                throw (NoDeviceMatchingTheGivenSelectorException) response.getException();
-            }
-            try {
-                Thread.sleep(1000);
-            } catch (InterruptedException e) {
-                // Nothing to do here.
-            }
-        } while (--allocateDeviceRetryCount > 0);
+        if (response.getException() instanceof NoDeviceMatchingTheGivenSelectorException) {
+            throw (NoDeviceMatchingTheGivenSelectorException) response.getException();
+        }
+        try {
+            Thread.sleep(1000);
+        } catch (InterruptedException e) {
+            // Nothing to do here.
+        }
 
         throw new NoAvailableDeviceFoundException();
     }
@@ -258,10 +256,14 @@ public class ClientDispatcher {
         return (List<Pair<String, String>>) response.getData();
     }
 
+    private ResponseMessage sendRequest(RequestMessage request, Session session) {
+        return sendRequest(request, session, WAIT_FOR_RESPONSE_TIME);
+    }
+
     /**
      * Sends a request and waits for a certain time for a response. If the connection is lost it tries to reconnect.
      */
-    private ResponseMessage sendRequest(RequestMessage request, Session session) {
+    private ResponseMessage sendRequest(RequestMessage request, Session session, int wait) {
         final String sessionId = session.getId();
         request.setSessionId(sessionId);
 
@@ -282,7 +284,7 @@ public class ClientDispatcher {
 
         synchronized (lockObject) {
             try {
-                lockObject.wait(WAIT_FOR_RESPONSE_TIME);
+                lockObject.wait(wait);
             } catch (InterruptedException e) {
                 LOGGER.error("Waiting for response interrupted.", e);
             }
